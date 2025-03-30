@@ -1,0 +1,3 @@
+projectConfig:
+  basePath: ~/projects
+  useGitSourcePath: true

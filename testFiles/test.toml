@@ -1,0 +1,12 @@
+nvim = "git@github.com/sironheart/nvim-config.git"
+
+[projectConfig]
+basePath = "~/projects"
+useGitSourcePath = false
+
+[[files]]
+path = "~/.ssh/config"
+content = """
+Host *
+  SetEnv TERM=xterm-256color
+"""
