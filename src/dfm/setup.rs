@@ -1,25 +1,32 @@
 use super::model::Config;
-use anyhow::{Result, anyhow};
+use super::projects::configure_project_base_path;
+use anyhow::{Context, Result, anyhow};
 use std::fs;
 use std::path::PathBuf;
 
 pub fn setup(path: PathBuf) -> Result<()> {
-    let config = generate_config(path)
+    let config = generate_config(path)?;
 
-    println!("{:?}", config?);
+    configure_project_base_path(config.project_config);
+
+    // println!("{:?}", config);
 
     Ok(())
 }
 
 fn generate_config(path: PathBuf) -> Result<Config> {
-    let config_content: String = fs::read_to_string(&path).expect("");
+    let config_content: String = fs::read_to_string(&path)
+        .with_context(|| format!("Cannot read file at path {:?}", &path))?;
 
-    let extension = path.extension().expect("").to_str().unwrap();
+    let extension = path
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .with_context(|| format!("Could not read extension from file or path"));
 
-    match extension {
-        "yml" | "yaml" => Ok(serde_yaml::from_str(&config_content).unwrap()),
-        "json" | "json5" => Ok(serde_json::from_str(&config_content).unwrap()),
-        "toml" => Ok(toml::from_str(&config_content).unwrap()),
+    match extension? {
+        "yml" | "yaml" => Ok(serde_yaml::from_str(&config_content)?),
+        "json" | "json5" => Ok(serde_json::from_str(&config_content)?),
+        "toml" => Ok(toml::from_str(&config_content)?),
         _ => Err(anyhow!("Cannot parse this file format!")),
     }
 }
