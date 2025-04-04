@@ -7,7 +7,9 @@ use std::path::PathBuf;
 pub fn setup(path: PathBuf) -> Result<()> {
     let config = generate_config(path)?;
 
-    configure_project_base_path(config.project_config);
+    configure_project_base_path(&config.project_config.clone())?;
+
+    println!("{:?}", config);
 
     // println!("{:?}", config);
 
@@ -15,6 +17,12 @@ pub fn setup(path: PathBuf) -> Result<()> {
 }
 
 fn generate_config(path: PathBuf) -> Result<Config> {
+    if path.is_dir() {
+        return Err(anyhow!(
+            "This command needs a single file, that is not a directory!"
+        ));
+    }
+
     let config_content: String = fs::read_to_string(&path)
         .with_context(|| format!("Cannot read file at path {:?}", &path))?;
 

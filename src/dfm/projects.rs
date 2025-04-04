@@ -1,11 +1,14 @@
 use super::model::ProjectConfig;
-use anyhow::{Context, Ok, Result};
+use anyhow::{Context, Error};
 use std::{fs, path::Path};
 
-pub fn configure_project_base_path(config: ProjectConfig) -> Result<()> {
-    if !Path::exists(&config.base_path) {
-        fs::create_dir_all::<_>(&config.base_path.canonicalize()?)
-            .with_context(|| format!("Could not create path"))?
+pub fn configure_project_base_path(config: &ProjectConfig) -> Result<(), Error> {
+    let base_path = match config.base_path.is_absolute() {
+        true => &config.base_path.canonicalize()?,
+        false => &config.base_path,
+    };
+    if !Path::try_exists(&base_path)? {
+        fs::create_dir_all(base_path).with_context(|| format!("Could not create project paths"))?;
     }
 
     return Ok(());

@@ -2,7 +2,7 @@ use serde::Deserialize;
 use std::default::Default;
 use std::path::PathBuf;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Default, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Config {
     pub project_config: ProjectConfig,
@@ -12,27 +12,27 @@ pub struct Config {
     pub linux: Option<LinuxConfig>,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Default, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ProjectConfig {
     pub base_path: PathBuf,
     pub use_git_source_path: bool,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Default, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DotfileDefinition {
     path: PathBuf,
     content: String,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Default, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct MacosConfig {
     brew: HomebrewDefinition,
     config_opts: MacosOpts,
 }
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Default, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct HomebrewDefinition {
     package: Option<Vec<String>>,
@@ -40,10 +40,10 @@ pub struct HomebrewDefinition {
     tap: Option<Vec<String>>,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Default, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct MacosOpts {}
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Default, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct LinuxConfig {}
