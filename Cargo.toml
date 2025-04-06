@@ -12,11 +12,11 @@ perf = { level = "deny", priority = -1 }
 pedantic = { level = "warn", priority = -1 }
 mod_module_files = "forbid"
 
-
 [dependencies]
 anyhow = "1.0.97"
-clap = { version = "4.5.34", features = ["cargo", "derive"] }
+clap = { version = "4.5.34", features = ["cargo"] }
 serde = { version = "1.0", features = [ "derive" ] }
 serde_json = "1.0.140"
-serde_yaml = "0.9.34"
+serde_yml = "0.0.12"
+shellexpand = "3.1.0"
 toml = "0.8.20"

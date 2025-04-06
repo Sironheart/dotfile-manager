@@ -1,18 +1,18 @@
 mod dfm;
 
 use anyhow::Result;
-use clap::Parser;
+use clap::{Arg, command};
 use std::path::PathBuf;
 
+const ARGUMENT_NAME: &str = "path";
+
 fn main() -> Result<()> {
-    let cli = Cli::parse();
+    let matches = command!().arg(Arg::new(ARGUMENT_NAME)).get_matches();
 
-    dfm::setup(cli.path)
-}
+    let path = match matches.get_one::<String>(ARGUMENT_NAME) {
+        Some(str) => PathBuf::from(str).canonicalize()?,
+        None => todo!(),
+    };
 
-#[derive(Parser, Debug)]
-#[command(author, version, about)]
-struct Cli {
-    #[arg(required = true)]
-    path: PathBuf,
+    dfm::setup(&path)
 }
