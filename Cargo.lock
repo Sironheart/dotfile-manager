@@ -104,16 +104,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5b63caa9aa9397e2d9480a9b13673856c78d8ac123288526c37d7839f2a86990"
 
 [[package]]
-name = "dfm"
-version = "0.1.0"
+name = "core"
+version = "0.0.0"
 dependencies = [
  "anyhow",
- "clap",
  "serde",
  "serde_json",
  "serde_yml",
  "shellexpand",
  "toml",
+]
+
+[[package]]
+name = "dfm"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "core",
+ "dotfile",
+ "mac",
 ]
 
 [[package]]
@@ -135,6 +145,14 @@ dependencies = [
  "option-ext",
  "redox_users",
  "windows-sys 0.48.0",
+]
+
+[[package]]
+name = "dotfile"
+version = "0.0.0"
+dependencies = [
+ "core",
+ "serde",
 ]
 
 [[package]]
@@ -206,6 +224,13 @@ checksum = "3302702afa434ffa30847a83305f0a69d6abd74293b6554c18ec85c7ef30c980"
 dependencies = [
  "anyhow",
  "version_check",
+]
+
+[[package]]
+name = "mac"
+version = "0.0.0"
+dependencies = [
+ "core",
 ]
 
 [[package]]

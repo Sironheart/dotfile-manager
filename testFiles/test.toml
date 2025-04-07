@@ -1,6 +1,6 @@
 nvim = "git@github.com/sironheart/nvim-config.git"
 
-[projectConfig]
+[base]
 basePath = "~/projects"
 useGitSourcePath = false
 

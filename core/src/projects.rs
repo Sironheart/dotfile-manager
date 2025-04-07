@@ -1,8 +1,8 @@
-use super::model::ProjectConfig;
+use super::basic_config::BaseConfig;
 use anyhow::{Context, Error};
 use std::{fs, path::Path};
 
-pub fn configure_project_base_path(config: &ProjectConfig) -> Result<(), Error> {
+pub fn configure_project_base_path(config: &BaseConfig) -> Result<(), Error> {
     let base_path = if config.base_path.is_absolute() {
         &config.base_path.canonicalize()?
     } else {
