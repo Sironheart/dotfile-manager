@@ -1,18 +1,17 @@
 extern crate serde;
 
+use anyhow::Result;
 use core::{
-    ConfigurationAdapter,
+    SetupAdapter,
     basic_config::{BasicConfigContent, deserialize_and_resolve_path},
-    configuration::generate_config,
 };
 use serde::Deserialize;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 #[derive(Deserialize, Default, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DotfileConfiguration {
-    pub base_configuration: BasicConfigContent,
-    pub(crate) files: Option<Vec<DotfileDefinition>>,
+    pub(crate) _files: Option<Vec<DotfileDefinition>>,
 }
 
 #[derive(Deserialize, Default, Debug, Clone)]
@@ -23,39 +22,20 @@ pub(crate) struct DotfileDefinition {
     _content: String,
 }
 
-impl std::ops::Deref for DotfileConfiguration {
-    type Target = BasicConfigContent;
+pub struct DotfileSetup {}
 
-    fn deref(&self) -> &Self::Target {
-        &self.base_configuration
-    }
-}
+impl SetupAdapter for DotfileSetup {
+    fn exec(
+        &self,
+        config_string: &str,
+        config_extension: &str,
+        _base_config: &BasicConfigContent,
+    ) -> Result<()> {
+        let config: DotfileConfiguration =
+            core::configuration::generate_config(config_string, config_extension)?;
 
-pub struct DotfileAdapter {
-    pub dotfile_configuration: Option<DotfileConfiguration>,
-}
+        println!("{config:?}");
 
-impl ConfigurationAdapter<DotfileConfiguration> for DotfileAdapter {
-    fn new(path: &Path) -> Self {
-        let Ok(config) = generate_config::<DotfileConfiguration>(path) else {
-            return Self {
-                dotfile_configuration: None,
-            };
-        };
-
-        Self {
-            dotfile_configuration: Some(config),
-        }
-    }
-
-    fn is_responsible(&self) -> bool {
-        match &self.dotfile_configuration {
-            Some(val) => val.files.iter().count() != 0,
-            _ => false,
-        }
-    }
-
-    fn execute(&self) {
-        todo!()
+        Ok(())
     }
 }
