@@ -1,0 +1,14 @@
+[package]
+name = "core"
+edition = "2024"
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_yml = { workspace = true }
+shellexpand = { workspace = true }
+toml = { workspace = true }

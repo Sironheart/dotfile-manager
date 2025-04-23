@@ -1,0 +1,8 @@
+[package]
+name = "dotfile"
+edition = "2024"
+
+[dependencies]
+anyhow = { workspace = true }
+core = { path = "../core" }
+serde = { workspace = true }
