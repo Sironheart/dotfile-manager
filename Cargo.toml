@@ -23,5 +23,13 @@ mod_module_files = "forbid"
 core = { path = "core" }
 dotfile = { path = "dotfile" }
 mac = { path = "mac" }
-anyhow = "1.0.97"
+anyhow = { workspace = true }
 clap = { version = "4.5.34", features = ["cargo"] }
+
+[workspace.dependencies]
+anyhow = "1.0.98"
+serde = { version = "1.0.219", features = [ "derive" ] }
+serde_json = "1.0.140"
+serde_yml = "0.0.12"
+shellexpand = "3.1.0"
+toml = "0.8.20"

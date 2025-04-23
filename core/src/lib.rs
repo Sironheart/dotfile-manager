@@ -24,18 +24,19 @@ pub fn setup(path: &Path, additional_modules: Vec<Box<dyn SetupAdapter>>) -> Res
     let config_content: String = fs::read_to_string(path)
         .with_context(|| format!("Cannot read file at path {}", path.display()))?;
 
-    let Some(extension) = path.extension().and_then(|ext| ext.to_str()) else {
-        return Err(anyhow!("Could not read extension "));
-    };
+    let extension = path
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .ok_or(anyhow!("Could not read extension "))?;
 
     let config = configuration::generate_config::<BasicConfigContent>(&config_content, extension)?;
 
     projects::configure_project_base_path(&config.base.clone())?;
 
     for module in additional_modules {
-        let _ = module
+        module
             .exec(&config_content, extension, &config)
-            .with_context(|| "Something went terribly wrong");
+            .with_context(|| "Something went terribly wrong")?;
     }
     Ok(())
 }
