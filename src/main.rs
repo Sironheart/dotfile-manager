@@ -1,6 +1,7 @@
 use anyhow::Result;
 use clap::{Arg, command};
 use dotfile::DotfileSetup;
+use mac::MacSetup;
 use std::path::PathBuf;
 
 const ARGUMENT_NAME: &str = "path";
@@ -13,7 +14,10 @@ fn main() -> Result<()> {
         None => todo!(),
     };
 
-    let _ = core::setup(&path, vec![Box::new(DotfileSetup {})]);
+    let _ = core::setup(
+        &path,
+        vec![Box::new(DotfileSetup {}), Box::new(MacSetup {})],
+    );
 
     Ok(())
 }
