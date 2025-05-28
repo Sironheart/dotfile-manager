@@ -1,5 +1,6 @@
 pub mod basic_config;
 pub mod configuration;
+pub mod git;
 pub mod projects;
 
 extern crate anyhow;

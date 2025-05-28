@@ -23,11 +23,14 @@ mod_module_files = "forbid"
 core = { path = "core" }
 dotfile = { path = "dotfile" }
 mac = { path = "mac" }
+
 anyhow = { workspace = true }
+
 clap = { version = "4.5.34", features = ["cargo"] }
 
 [workspace.dependencies]
 anyhow = "1.0.98"
+git2 = { version = "0.20.2", features = ["vendored-openssl", "vendored-libgit2"] }
 serde = { version = "1.0.219", features = [ "derive" ] }
 serde_json = "1.0.140"
 serde_yml = "0.0.12"
