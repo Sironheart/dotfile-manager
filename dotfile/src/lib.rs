@@ -1,9 +1,11 @@
 extern crate serde;
+extern crate shellexpand;
 
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use core::{
     SetupAdapter,
     basic_config::{BasicConfigContent, deserialize_and_resolve_path},
+    git::GitModule,
 };
 use serde::Deserialize;
 use std::{
@@ -16,7 +18,7 @@ use std::{
 #[serde(rename_all = "camelCase")]
 pub struct DotfileConfiguration {
     pub(crate) files: Option<Vec<DotfileDefinition>>,
-    pub(crate) _nvim: String,
+    pub(crate) _nvim: Option<String>,
 }
 
 #[derive(Deserialize, Default, Debug, Clone)]
@@ -34,13 +36,13 @@ impl SetupAdapter for DotfileSetup {
         &self,
         config_string: &str,
         config_extension: &str,
-        _base_config: &BasicConfigContent,
+        base_config: &BasicConfigContent,
     ) -> Result<()> {
         let config: DotfileConfiguration =
             core::configuration::generate_config(config_string, config_extension)?;
 
         config.create_files();
-        println!("{:?}", config._nvim);
+        config.create_program_files(base_config)?;
 
         Ok(())
     }
@@ -52,6 +54,26 @@ impl DotfileConfiguration {
             .iter()
             .flatten()
             .for_each(|f| f.create_system_file());
+    }
+
+    fn create_program_files(&self, base_config: &BasicConfigContent) -> Result<()> {
+        let nvim = match &self._nvim {
+            Some(nvim) => nvim,
+            None => return Ok(()),
+        };
+
+        let target_path = match GitModule::get_project_path(nvim, base_config) {
+            Some(target_path) => {
+                let base_dir = &base_config.base.base_path.to_str().unwrap();
+
+                format!("{}/{}", base_dir, target_path)
+            }
+            None => return Err(anyhow!("This should not be possible")),
+        };
+
+        GitModule::git_clone(nvim, &target_path)?;
+
+        Ok(())
     }
 }
 

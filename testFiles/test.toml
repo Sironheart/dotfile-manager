@@ -1,8 +1,9 @@
-nvim = "git@github.com/sironheart/nvim-config.git"
+# nvim = "git@github.com:Sironheart/neovim-config.git"
+nvim = "https://github.com/Sironheart/neovim-config.git"
 
 [base]
 basePath = "~/projects"
-useGitSourcePath = false
+useGitSourcePath = true
 
 [[files]]
 path = "~/.ssh/config"

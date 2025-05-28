@@ -6,3 +6,4 @@ edition = "2024"
 anyhow = { workspace = true }
 core = { path = "../core" }
 serde = { workspace = true }
+shellexpand = { workspace = true }
