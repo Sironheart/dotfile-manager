@@ -7,6 +7,7 @@ use std::path::PathBuf;
 #[serde(rename_all = "camelCase")]
 pub struct BasicConfigContent {
     pub base: BaseConfig,
+    pub force: bool,
 }
 
 #[derive(Deserialize, Default, Debug, Clone)]
@@ -14,7 +15,7 @@ pub struct BasicConfigContent {
 pub struct BaseConfig {
     #[serde(deserialize_with = "deserialize_and_resolve_path")]
     pub base_path: PathBuf,
-    pub _use_git_source_path: bool,
+    pub use_git_source_path: bool,
 }
 
 pub fn deserialize_and_resolve_path<'de, D>(deserializer: D) -> Result<PathBuf, D::Error>
