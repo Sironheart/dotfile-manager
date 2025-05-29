@@ -12,22 +12,20 @@ impl GitModule {
             fs::create_dir_all(parent)?;
         };
 
-        let repo = match Repository::clone(source_path, target_folder) {
-            Ok(repository) => repository,
-            Err(err) => {
-                println!("Git clone failed with following error: {}", err.message());
-                return Ok(());
-            }
-        };
-
-        println!("cloned repository: {:?}", repo.workdir());
-
+        Repository::clone(source_path, target_folder)
+            .map(|repo| {
+                println!("cloned repository: {:?}", repo.workdir());
+            })
+            .unwrap_or_else(|err| {
+                eprintln!("Git clone failed with following error: {}", err.message());
+            });
         Ok(())
     }
 
     pub fn get_project_path(source_path: &str, base_config: &BasicConfigContent) -> Option<String> {
         let source_path = source_path.trim_end_matches(".git");
-        let source = if base_config.base._use_git_source_path {
+
+        if base_config.base.use_git_source_path {
             Some(
                 source_path
                     .rsplit("@")
@@ -35,15 +33,16 @@ impl GitModule {
                     .rsplit("//")
                     .next()?
                     .replace(":", "/")
-                    .to_lowercase(),
+                    .to_lowercase()
+                    .to_string(),
             )
         } else {
-            return match source_path.rsplit("/").next() {
-                Some(str) => Some(str.to_string()),
-                None => return None,
-            };
-        }?;
-
-        Some(source.to_string())
+            Some(
+                source_path
+                    .rsplit("/")
+                    .next()
+                    .map(|source| source.to_string())?,
+            )
+        }
     }
 }

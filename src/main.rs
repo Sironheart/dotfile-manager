@@ -1,23 +1,33 @@
-use anyhow::Result;
-use clap::{Arg, command};
+#![allow(unknown_lints)]
+#![allow(clippy)]
+
+use clap::Parser;
+use core::SetupAdapter;
 use dotfile::DotfileSetup;
 use mac::MacSetup;
 use std::path::PathBuf;
 
-const ARGUMENT_NAME: &str = "path";
+fn main() {
+    let args = Args::parse();
 
-fn main() -> Result<()> {
-    let matches = command!().arg(Arg::new(ARGUMENT_NAME)).get_matches();
-
-    let path = match matches.get_one::<String>(ARGUMENT_NAME) {
-        Some(str) => PathBuf::from(str).canonicalize()?,
-        None => todo!(),
+    let os_specific_module: Box<dyn SetupAdapter> = if cfg!(target_os = "macos") {
+        Box::new(MacSetup {})
+    } else {
+        eprint!("Not supported OS");
+        return;
     };
 
-    let _ = core::setup(
-        &path,
-        vec![Box::new(DotfileSetup {}), Box::new(MacSetup {})],
-    );
+    let default_modules: Vec<Box<dyn SetupAdapter>> =
+        vec![Box::new(DotfileSetup {}), os_specific_module];
 
-    Ok(())
+    let _ = core::setup(args.path.as_path(), args.force, default_modules);
+}
+
+#[derive(Parser, Debug)]
+#[command(version, about, arg_required_else_help(true))]
+struct Args {
+    path: PathBuf,
+
+    #[arg(short, long)]
+    force: bool,
 }

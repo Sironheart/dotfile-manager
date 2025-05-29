@@ -1,6 +1,5 @@
 use anyhow::Result;
 use core::SetupAdapter;
-use std::env::consts;
 
 pub struct MacSetup {}
 
@@ -11,10 +10,7 @@ impl SetupAdapter for MacSetup {
         _config_extension: &str,
         _base_config: &core::basic_config::BasicConfigContent,
     ) -> Result<()> {
-        match consts::OS {
-            "ios" | "macos" | "apple" => {}
-            _ => return Ok(()),
-        }
+        println!("This is a macos setup!");
 
         Ok(())
     }
