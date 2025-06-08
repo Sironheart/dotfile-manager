@@ -14,11 +14,12 @@ impl GitModule {
 
         Repository::clone(source_path, target_folder)
             .map(|repo| {
-                println!("cloned repository: {:?}", repo.workdir());
+                tracing::info!("cloned repository: {:?}", repo.workdir());
             })
             .unwrap_or_else(|err| {
-                eprintln!("Git clone failed with following error: {}", err.message());
+                tracing::warn!("Git clone failed with following error: {}", err.message());
             });
+
         Ok(())
     }
 
