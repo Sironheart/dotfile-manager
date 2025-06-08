@@ -7,3 +7,4 @@ anyhow = { workspace = true }
 core = { path = "../core" }
 serde = { workspace = true }
 shellexpand = { workspace = true }
+tracing = { workspace = true }

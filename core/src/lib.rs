@@ -38,10 +38,7 @@ pub fn setup(
         &add_force_field_to_config(force, extension, &config_content),
         extension,
     )
-    .map_err(|_| {
-        println!("Could not serialize");
-        anyhow!("Well, shit!")
-    })?;
+    .with_context(|| "Well, shit!")?;
 
     projects::configure_project_base_path(&config.base.clone())?;
 

@@ -8,12 +8,14 @@ use mac::MacSetup;
 use std::path::PathBuf;
 
 fn main() {
+    tracing_subscriber::fmt::init();
+
     let args = Args::parse();
 
     let os_specific_module: Box<dyn SetupAdapter> = if cfg!(target_os = "macos") {
         Box::new(MacSetup {})
     } else {
-        eprint!("Not supported OS");
+        tracing::error!("Not supported OS");
         return;
     };
 

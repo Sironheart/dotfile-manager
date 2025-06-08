@@ -10,7 +10,7 @@ impl SetupAdapter for MacSetup {
         _config_extension: &str,
         _base_config: &core::basic_config::BasicConfigContent,
     ) -> Result<()> {
-        println!("This is a macos setup!");
+        tracing::info!("This is a macos setup!");
 
         Ok(())
     }

@@ -1,7 +1,7 @@
 extern crate serde;
 extern crate shellexpand;
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use core::{
     SetupAdapter,
     basic_config::{BasicConfigContent, deserialize_and_resolve_path},
@@ -11,7 +11,7 @@ use serde::Deserialize;
 use std::{
     fs::{self, File},
     io::{ErrorKind, Write},
-    path::PathBuf,
+    path::{Path, PathBuf},
 };
 
 #[derive(Deserialize, Default, Debug, Clone)]
@@ -69,10 +69,16 @@ impl DotfileConfiguration {
                 .base
                 .base_path
                 .to_str()
-                .expect("this should have already been validated to exist."),
+                .with_context(|| "this should have already been validated to exist.")?,
             GitModule::get_project_path(nvim, base_config)
-                .expect("Malformed git resource mentioned!"),
+                .with_context(|| "Malformed git resource mentioned!")?,
         );
+
+        let path = Path::new(&target_path);
+
+        if base_config.force && Path::try_exists(path)? {
+            fs::remove_dir(path)?
+        }
 
         GitModule::git_clone(nvim, &target_path)?;
 
@@ -89,11 +95,11 @@ impl DotfileDefinition {
         } else {
             File::create_new(&self.path).map_err(|err| {
                 match err.kind() {
-                    ErrorKind::AlreadyExists => println!(
+                    ErrorKind::AlreadyExists => tracing::info!(
                         "{:?} already exists. Delete or backup the current version and try again.",
                         self.path
                     ),
-                    _ => eprintln!("{err:?}"),
+                    _ => tracing::error!("{err:?}"),
                 }
                 err
             })
@@ -101,7 +107,7 @@ impl DotfileDefinition {
         .map(|mut f| {
             f.write_all(self.content.as_bytes()).ok();
 
-            println!("created {:?}", self.path);
+            tracing::info!("created {:?}", self.path);
         });
     }
 }
