@@ -11,6 +11,7 @@ use serde::Deserialize;
 use std::{
     fs::{self, File},
     io::{ErrorKind, Write},
+    os::unix::fs as unix_fs,
     path::{Path, PathBuf},
 };
 
@@ -57,10 +58,22 @@ impl DotfileConfiguration {
     }
 
     fn create_program_files(&self, base_config: &BasicConfigContent) -> Result<()> {
+        self.handle_nvim_files(base_config).with_context(|| {
+            tracing::info!(
+                "There was an error during nvim configuration. Please check whether this is acceptable on your system"
+            );
+
+            "Could not create the nvim settings"
+        })?;
+
+        Ok(())
+    }
+
+    fn handle_nvim_files(&self, base_config: &BasicConfigContent) -> Result<()> {
         let nvim = match &self.nvim {
             Some(nvim) => nvim,
-            None => return Ok(()), // probably not a nvim user... which is wrong in other than
-                                   // we're able to handle right here.
+            None => return Ok(()), // probably not a nvim user... which is wrong in other ways
+                                   // than we're able to handle right here.
         };
 
         let target_path = format!(
@@ -77,10 +90,22 @@ impl DotfileConfiguration {
         let path = Path::new(&target_path);
 
         if base_config.force && Path::try_exists(path)? {
-            fs::remove_dir(path)?
+            fs::remove_dir_all(path).with_context(|| "couldn't delete {path:}")?
         }
 
         GitModule::git_clone(nvim, &target_path)?;
+
+        let target_nvim_dir = shellexpand::full("~/.config/nvim")
+            .with_context(|| "Wasn't able to resolve to the home `.config` dir.")?
+            .into_owned();
+
+        if base_config.force && Path::try_exists(Path::new(&target_nvim_dir))? {
+            fs::remove_file(&target_nvim_dir)?;
+        }
+
+        unix_fs::symlink(&target_path, target_nvim_dir)?;
+
+        tracing::info!("Nvim is now cloned and confitgured");
 
         Ok(())
     }

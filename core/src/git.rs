@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs, path::Path};
 
 use git2::Repository;
 
@@ -14,7 +14,10 @@ impl GitModule {
 
         Repository::clone(source_path, target_folder)
             .map(|repo| {
-                tracing::info!("cloned repository: {:?}", repo.workdir());
+                tracing::info!(
+                    "cloned repository: {:?}",
+                    repo.workdir().unwrap_or_else(|| Path::new(source_path))
+                );
             })
             .unwrap_or_else(|err| {
                 tracing::warn!("Git clone failed with following error: {}", err.message());
