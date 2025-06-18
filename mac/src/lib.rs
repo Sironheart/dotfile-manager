@@ -68,7 +68,7 @@ impl MacosDefinition {
             let mut wait_duration: Duration = Duration::from_secs(0);
 
             while !self.is_xcode_installed() {
-                wait_duration = wait_duration + Duration::from_secs(5);
+                wait_duration += Duration::from_secs(5);
                 std::thread::sleep(wait_duration);
 
                 if wait_duration > Duration::from_secs(60) {
