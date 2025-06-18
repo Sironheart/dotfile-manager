@@ -4,6 +4,7 @@ extern crate serde;
 extern crate tracing;
 
 use anyhow::{Result, anyhow};
+use cmd_lib::run_fun;
 use core::SetupAdapter;
 use serde::Deserialize;
 use std::{process::Command, time::Duration};
@@ -17,13 +18,13 @@ struct MacosConfiguration {
 #[derive(Deserialize, Default, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 struct MacosDefinition {
-    _brew: Option<HomebrewDefinition>,
+    brew: Option<HomebrewDefinition>,
 }
 
 #[derive(Deserialize, Default, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 struct HomebrewDefinition {
-    _packages: Option<Vec<String>>,
+    packages: Option<Vec<String>>,
 }
 
 pub struct MacSetup {}
@@ -82,7 +83,16 @@ impl MacosDefinition {
             self.install_homebrew()?;
         }
 
-        tracing::info!("homebrew is already installed!");
+        tracing::debug!("homebrew is already installed!");
+
+        if let Some(brew) = &self.brew {
+            if let Some(packages) = &brew.packages {
+                let packages = packages.join(" ");
+                run_fun!(brew install -q ${packages})?;
+            }
+        }
+
+        tracing::info!("successfully installed all packages");
 
         Ok(())
     }
@@ -111,7 +121,10 @@ impl MacosDefinition {
 
     fn install_homebrew(&self) -> Result<()> {
         Command::new("/bin/bash")
-            .args(["-c"])
+            .args([
+                "-c",
+                "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)",
+            ])
             .output()
             .map(|o| o.status.success())?;
 

@@ -99,13 +99,13 @@ impl DotfileConfiguration {
             .with_context(|| "Wasn't able to resolve to the home `.config` dir.")?
             .into_owned();
 
-        if base_config.force && Path::try_exists(Path::new(&target_nvim_dir))? {
+        if Path::try_exists(Path::new(&target_nvim_dir))? {
             fs::remove_file(&target_nvim_dir)?;
         }
 
         unix_fs::symlink(&target_path, target_nvim_dir)?;
 
-        tracing::info!("Nvim is now cloned and confitgured");
+        tracing::info!("Nvim is now setup");
 
         Ok(())
     }
@@ -132,7 +132,7 @@ impl DotfileDefinition {
         .map(|mut f| {
             f.write_all(self.content.as_bytes()).ok();
 
-            tracing::info!("created {:?}", self.path);
+            tracing::debug!("created {:?}", self.path);
         });
     }
 }
