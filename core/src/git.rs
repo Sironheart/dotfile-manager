@@ -12,9 +12,17 @@ impl GitModule {
             fs::create_dir_all(parent)?;
         };
 
+        if fs::exists(target_folder)? {
+            tracing::info!(
+                "the path \"{}\" already exists. If you'd like to overwrite this path use the `--force` flag.",
+                target_folder
+            );
+            return Ok(());
+        }
+
         Repository::clone(source_path, target_folder)
             .map(|repo| {
-                tracing::info!(
+                tracing::debug!(
                     "cloned repository: {:?}",
                     repo.workdir().unwrap_or_else(|| Path::new(source_path))
                 );
@@ -32,11 +40,11 @@ impl GitModule {
         if base_config.base.use_git_source_path {
             Some(
                 source_path
-                    .rsplit("@")
+                    .rsplit("@") // remove everything before an `@`, like in most ssh clone URLs
                     .next()?
-                    .rsplit("//")
+                    .rsplit("//") // do remove the stuff in front of `//`, like in most https URLs
                     .next()?
-                    .replace(":", "/")
+                    .replace(":", "/") // in git urls somehow hostnames and folders are split using `:`
                     .to_lowercase()
                     .to_string(),
             )

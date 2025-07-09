@@ -3,6 +3,8 @@ name = "mac"
 edition = "2024"
 
 [dependencies]
-core = { path = "../core" }
 anyhow = { workspace = true }
+cmd_lib = { workspace = true }
+core = { path = "../core" }
+serde = { workspace = true }
 tracing = { workspace = true }

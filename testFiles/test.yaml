@@ -1,3 +1,93 @@
+nvim: https://github.com/Sironheart/neovim-config.git
 base:
   basePath: ~/projects
   useGitSourcePath: true
+
+files:
+  - path: ~/.ssh/config
+    content: |
+      Include ~/.orbstack/ssh/config
+
+      #Host *
+      #	IdentityAgent ~/.1password/agent.sock
+
+      Host *
+        IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+        ServerAliveInterval 3600
+        SetEnv TERM=xterm-256color
+  - path: ~/.config/1Password/ssh/agent.toml
+    content: |
+      [[ssh-keys]]
+      vault = "Personal"
+
+      [[ssh-keys]]
+      vault = "Work"
+  - path: ~/.rgignore
+    content: "!.env*"
+
+macos:
+  brew:
+    packages:
+      # general purpose
+      - atuin
+      - awscli
+      - bat
+      - eza
+      - fd
+      - ffmpeg
+      - fish
+      - gnupg
+      - jq
+      - just
+      - ripgrep
+      - starship
+      - zoxide
+
+      # kubernetes
+      - fzf
+      - helm
+      - kubectl
+      - kubelogin
+      - k9s
+
+      # languages
+      - composer
+      - go
+      - node@22
+      - php@8.4
+      - pnpm
+      - rustup
+
+      # package managers
+      - asdf
+
+      # random stuff
+      - font-geist-mono
+      - font-geist-mono-nerd-font
+
+      # needed for nvim
+      - gh
+      - glab
+      - imagemagick
+      - neovim
+      - pinentry-mac
+      - pipx
+      - pulumi
+      - wget
+
+    casks:
+      - 1password
+      - brave-browser
+      - discord
+      - elgato-camera-hub
+      - elgato-stream-deck
+      - ghostty
+      - jordanbaird-ice
+      - logi-options+
+      - notion
+      - obs
+      - obsidian
+      - raycast
+      - spotify
+      # - tailscale
+      - zed
