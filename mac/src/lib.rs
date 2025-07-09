@@ -1,13 +1,8 @@
-extern crate anyhow;
-extern crate core;
-extern crate serde;
-extern crate tracing;
-
 use anyhow::{Result, anyhow};
-use cmd_lib::run_fun;
+use cmd_lib::{run_cmd, run_fun};
 use core::SetupAdapter;
 use serde::Deserialize;
-use std::{process::Command, time::Duration};
+use std::collections::HashSet;
 
 #[derive(Deserialize, Default, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -24,7 +19,7 @@ struct MacosDefinition {
 #[derive(Deserialize, Default, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 struct HomebrewDefinition {
-    packages: Option<Vec<String>>,
+    packages: Option<HashSet<String>>,
 }
 
 pub struct MacSetup {}
@@ -62,33 +57,43 @@ impl MacosConfiguration {
 
 impl MacosDefinition {
     fn setup_homebrew(&self) -> Result<()> {
-        if !self.is_xcode_installed() {
-            self.install_xcode()?;
-
-            let mut wait_duration: Duration = Duration::from_secs(0);
-
-            while !self.is_xcode_installed() {
-                wait_duration += Duration::from_secs(5);
-                std::thread::sleep(wait_duration);
-
-                if wait_duration > Duration::from_secs(60) {
-                    return Err(anyhow!(
-                        "Homebrew wasn't installed successfully. Consider installing xcode-cli by yourself"
-                    ));
-                }
-            }
-        }
-
         if !self.is_homebrew_installed() {
-            self.install_homebrew()?;
+            tracing::error!(
+                "You will need to install homebrew manually first. Please take a look at https://brew.sh/ for that"
+            );
+
+            return Err(anyhow!("Homebrew not installed!"));
         }
 
         tracing::debug!("homebrew is already installed!");
 
         if let Some(brew) = &self.brew {
             if let Some(packages) = &brew.packages {
-                let packages = packages.join(" ");
-                run_fun!(brew install -q ${packages})?;
+                // std::env::set_var("HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK", "1");
+
+                let installed: HashSet<String> = run_fun!(brew leaves)?
+                    .split("\n")
+                    .map(|s| s.to_string())
+                    .collect();
+
+                let to_remove: Vec<String> = installed
+                    .difference(packages)
+                    .map(|s| s.to_owned())
+                    .collect();
+
+                if !to_remove.is_empty() {
+                    run_cmd!(
+                        HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew remove -f -q --formula $[to_remove]
+                    )?;
+                }
+
+                let packages: Vec<String> = packages.iter().map(|s| s.to_string()).collect();
+
+                if !packages.is_empty() {
+                    run_cmd!(
+                            HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew install -q --formula $[packages]
+                    )?;
+                }
             }
         }
 
@@ -97,37 +102,7 @@ impl MacosDefinition {
         Ok(())
     }
 
-    fn is_xcode_installed(&self) -> bool {
-        Command::new("xcode-select")
-            .arg("-p")
-            .output()
-            .map(|o| o.status.success())
-            .unwrap_or(false)
-    }
-
-    fn install_xcode(&self) -> Result<()> {
-        let status = Command::new("xcode-select").arg("--install").status()?;
-
-        tracing::info!("{:?}", status);
-        todo!()
-    }
-
     fn is_homebrew_installed(&self) -> bool {
-        Command::new("brew")
-            .output()
-            .map(|o| o.status.success())
-            .unwrap_or(false)
-    }
-
-    fn install_homebrew(&self) -> Result<()> {
-        Command::new("/bin/bash")
-            .args([
-                "-c",
-                "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)",
-            ])
-            .output()
-            .map(|o| o.status.success())?;
-
-        Ok(())
+        run_cmd!(brew help >> /dev/null).is_ok()
     }
 }

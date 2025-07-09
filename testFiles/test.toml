@@ -21,4 +21,4 @@ Host *
 
 [macos.brew]
 
-packages = ["htop"]
+packages = ["htop", "btop"]
